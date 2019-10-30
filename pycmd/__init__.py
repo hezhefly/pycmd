@@ -5,4 +5,5 @@
 @Software: PyCharm
 @File: __init__.py.py
 """
-from .fpip import main
+from .fpip import fpip
+from .youdict import youdict
