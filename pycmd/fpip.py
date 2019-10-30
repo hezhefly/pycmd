@@ -24,5 +24,5 @@ class FastPip(object):
             f"pip install {self.arg}{name}{mirror} --no-cache-dir")
 
 
-def main():
+def fpip():
     fire.Fire(FastPip)
