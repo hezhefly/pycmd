@@ -2,7 +2,7 @@
 ## 安装
 
 ```bash
-pip install -U git+https://github.com/hezhefly/pycmd.git
+pip install git+https://github.com/hezhefly/pycmd.git
 ```
 
 ## `fpip`使用方法

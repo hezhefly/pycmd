@@ -7,7 +7,7 @@ setup(
     author='何韦澄',  # 作者
     author_email='hezhefly@163.com',  # 作者邮箱
     url='/',  # 包的主页
-
+    install_requires=["fire"],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     entry_points={
