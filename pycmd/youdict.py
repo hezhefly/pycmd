@@ -10,6 +10,7 @@ import re
 import fire
 import requests
 from lxml import etree
+from requests.exceptions import SSLError
 
 
 class YouDict(object):
@@ -17,37 +18,55 @@ class YouDict(object):
 
     def __init__(self, word):
         self.word = word
+        self.base_xpath = "//div[@id='article']/h2"
         self.url = "https://www.youdict.com/root/search"
         self.tree = self.analysis(word)
         self.run()
 
     def analysis(self, word):
+        print(f"正在解析{self.url}")
         while True:
             try:
                 content = requests.get(self.url, params={"wd": word}).text
                 break
-            except:
-                print("请求失败！")
+            except SSLError:
+                print("通讯请求失败！")
         tree = etree.HTML(content, parser=etree.HTMLParser(encoding='utf-8'))
         return tree
 
-    @staticmethod
-    def reg(line):
-        obj = re.match(r"(.*)[(（](.*)[）)]", line.strip())
-        return obj.group(1), obj.group(2)
-
     def get_words(self):
         """获取词表"""
-        pos = "//div[@class='content']/h2[3]/following-sibling::p[following::h2[2]]"
+        print("正在获取单词...")
+        pos = f"{self.base_xpath}[3]/following-sibling::p[following::h2[count({self.base_xpath})-3]]"
+        # pos = "//div[@class='content']/h2[3]/following-sibling::p[following::h2[3]]"
         xpath = f'{pos}/a/text()|{pos}/text()'
         nodes = self.tree.xpath(xpath)
-        ch, remark = zip(*map(self.reg, nodes[1::2]))
+        ch, remark = zip(*self.search(nodes[1::2]))
         res = zip(nodes[0::2], ch, remark)
         return "".join(("## {0}：{1}\n{2}\n".format(*i) for i in res))
 
+    def search(self, nodes):
+        for i in nodes:
+            ind = self.rfind(i, "（")
+            if ind is None:
+                ind = self.rfind(i, "(")
+                if ind is None:
+                    yield i, ""
+                    continue
+            yield i[:ind], re.sub(r'[()（）]', "", i[ind:], re.M | re.I)
+
+    @staticmethod
+    def rfind(string, target):
+        if target in string:
+            ind = string.rfind(target)
+            return ind
+        else:
+            return None
+
     def get_head(self):
         """获取标题"""
-        xpath = "//*[@id='article']/h2[3]"
+        print("正在获取标题")
+        xpath = f"{self.base_xpath}[3]"
         nodes = self.tree.xpath(xpath)[0]
         return "# " + "".join(map(lambda x: x.replace(" ", ""), nodes.itertext())) + "\n"
 
@@ -65,3 +84,7 @@ def you(word):
 
 def youdict():
     fire.Fire(you)
+
+
+# if __name__ == '__main__':
+#     YouDict("quire")

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pycmd',  # 包名字
-    version='0.11',  # 包版本
+    version='0.12',  # 包版本
     description='python命令行程序',  # 简单描述
     author='何韦澄',  # 作者
     author_email='hezhefly@163.com',  # 作者邮箱
