@@ -16,11 +16,13 @@ from requests.exceptions import SSLError
 class YouDict(object):
     """优词获取词根"""
 
-    def __init__(self, word):
+    def __init__(self, word, ind):
         self.word = word
+        self.ind = ind
         self.base_xpath = "//div[@id='article']/h2"
         self.url = "https://www.youdict.com/root/search"
         self.tree = self.analysis(word)
+        self.h2_num = int(self.tree.xpath(f"count({self.base_xpath})"))
         self.run()
 
     def analysis(self, word):
@@ -37,7 +39,9 @@ class YouDict(object):
     def get_words(self):
         """获取词表"""
         print("正在获取单词...")
-        pos = f"{self.base_xpath}[3]/following-sibling::p[following::h2[count({self.base_xpath})-3]]"
+        diff = self.h2_num - self.ind
+        end = "*" if diff == 0 else f"h2[{diff}]"
+        pos = f"{self.base_xpath}[{self.ind}]/following-sibling::p[following::{end}]"
         # pos = "//div[@class='content']/h2[3]/following-sibling::p[following::h2[3]]"
         xpath = f'{pos}/a/text()|{pos}/text()'
         nodes = self.tree.xpath(xpath)
@@ -66,7 +70,7 @@ class YouDict(object):
     def get_head(self):
         """获取标题"""
         print("正在获取标题")
-        xpath = f"{self.base_xpath}[3]"
+        xpath = f"{self.base_xpath}[{self.ind}]"
         nodes = self.tree.xpath(xpath)[0]
         return "# " + "".join(map(lambda x: x.replace(" ", ""), nodes.itertext())) + "\n"
 
@@ -78,13 +82,13 @@ class YouDict(object):
         print(f"{self.word}.md 保存成功！")
 
 
-def you(word):
-    YouDict(word)
+def you(word, ind):
+    YouDict(word, ind)
 
 
 def youdict():
     fire.Fire(you)
 
-
+#
 # if __name__ == '__main__':
-#     YouDict("quire")
+#     YouDict("point", 2)
