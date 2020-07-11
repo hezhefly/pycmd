@@ -23,6 +23,10 @@ class FastPip(object):
         return run_cmd(
             f"pip install {self.arg}{name}{mirror} --no-cache-dir")
 
+    def update(self, name):
+        self.arg = "-U "
+        return self.install(name)
+
 
 def fpip():
     fire.Fire(FastPip)
